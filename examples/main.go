@@ -4,6 +4,7 @@ import (
 	"github.com/gobasis/log"
 	"time"
 	"github.com/gobasis/log/zapimpl"
+	"go.uber.org/zap"
 )
 
 /*
@@ -14,26 +15,40 @@ show demos of gobasis/log
 */
 func main() {
 	benchMark()
-	//levelDemo()
+	levelDemo()
 }
 
 var url = "www.chain.com"
 
 func benchMark() {
+	var count = 1000000
 	log.UseLog(&log.StandardLogger{})
-	fromStd := time.Now().UnixNano()
-	for i := 0; i < 1000000; i++ {
-		log.Info("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
+	fromStd := time.Now().Unix()
+	for i := 0; i < count; i++ {
+		log.Info("using standard log, failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	}
-	toStd := time.Now().UnixNano()
+	toStd := time.Now().Unix()
 	log.UseLog(&zapimpl.Logger{})
-	fromZap := time.Now().UnixNano()
-	for i := 0; i < 1000000; i++ {
-		log.Info("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
+	fromZap := time.Now().Unix()
+	for i := 0; i < count; i++ {
+		log.Info("using zap log, failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	}
-	toZap := time.Now().UnixNano()
+	toZap := time.Now().Unix()
+	zlog, _ := zap.NewProduction()
+	sugar := zlog.Sugar()
+	fromRawZap := time.Now().Unix()
+	for i := 0; i < count; i++ {
+		sugar.Infow("using raw zap log, failed to fetch URL",
+			// Structured context as loosely typed key-value pairs.
+			"url", url,
+			"attempt", 3,
+			"backoff", time.Second,
+		)
+	}
+	toRawZap := time.Now().Unix()
 	log.Info("elapse time", "fromStd", fromStd, "toStd", toStd, "diff", toStd-fromStd)
 	log.Info("elapse time", "fromZap", fromZap, "toZap", toZap, "diff", toZap-fromZap)
+	log.Info("elapse time", "fromRawZap", fromRawZap, "toRawZap", toRawZap, "diff", toRawZap-fromRawZap)
 }
 
 func levelDemo() {

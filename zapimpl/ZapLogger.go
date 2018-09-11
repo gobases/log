@@ -15,37 +15,31 @@ type Logger struct {
 	atomLevel zap.AtomicLevel
 }
 
-func (z *Logger) getLog() *zap.Logger {
+func (z *Logger) getLog() *zap.SugaredLogger {
 	if z.log == nil {
+		var opts = []zap.Option{zap.AddCallerSkip(2)}
 		z.atomLevel = zap.NewAtomicLevel()
 		workDir, _ := filepath.Abs("./")
 		var file = filepath.Join(workDir, "conf", "log.json")
 		_, err := os.Stat(file)
 		if err != nil || os.IsNotExist(err) {
-			encoderConf := zap.NewProductionEncoderConfig()
-			z.log = zap.New(zapcore.NewCore(
-				zapcore.NewJSONEncoder(encoderConf),
-				zapcore.Lock(os.Stdout),
-				z.atomLevel,
-			))
+			conf := zap.NewProductionConfig()
+			conf.Level = z.atomLevel
+			z.log, _ = conf.Build(opts...)
 		} else { // load config from file then create a logger
 			buf, err := ioutil.ReadFile(file)
 			if err != nil {
 				panic(err)
 			}
-			var cfg = zap.NewProductionConfig()
-			if err := json.Unmarshal(buf, &cfg); err != nil {
+			var conf = zap.NewProductionConfig()
+			if err := json.Unmarshal(buf, &conf); err != nil {
 				panic(err)
 			}
-			cfg.Level = z.atomLevel
-			logger, err := cfg.Build()
-			if err != nil {
-				panic(err)
-			}
-			z.log = logger
+			conf.Level = z.atomLevel
+			z.log, _ = conf.Build(opts...)
 		}
 	}
-	return z.log
+	return z.log.Sugar()
 }
 
 func (z *Logger) SetLevel(lvl int8) {
@@ -60,25 +54,25 @@ func (z *Logger) SetLevel(lvl int8) {
 }
 
 func (z *Logger) Debug(msg string, data []interface{}) {
-	z.getLog().Sugar().Debugw(msg, data...)
+	z.getLog().Debugw(msg, data...)
 }
 
 func (z *Logger) Info(msg string, data []interface{}) {
-	z.getLog().Sugar().Infow(msg, data...)
+	z.getLog().Infow(msg, data...)
 }
 
 func (z *Logger) Warn(msg string, data []interface{}) {
-	z.getLog().Sugar().Warnw(msg, data...)
+	z.getLog().Warnw(msg, data...)
 }
 
 func (z *Logger) Error(msg string, data []interface{}) {
-	z.getLog().Sugar().Errorw(msg, data...)
+	z.getLog().Errorw(msg, data...)
 }
 
 func (z *Logger) Panic(msg string, data []interface{}) {
-	z.getLog().Sugar().Panicw(msg, data...)
+	z.getLog().Panicw(msg, data...)
 }
 
 func (z *Logger) Fatal(msg string, data []interface{}) {
-	z.getLog().Sugar().Fatalw(msg, data...)
+	z.getLog().Fatalw(msg, data...)
 }
