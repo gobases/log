@@ -1,11 +1,6 @@
 {
-  "use": "std",
   "level": "debug",
-  "encoding": "json",
-  "outputPaths": ["stdout", "debug.log"],
-  "errorOutputPaths": ["stderr"],
-  "initialFields": {"foo": "bar"},
-  "encoderConfig": {
+  "rotate": {
     "messageKey": "message",
     "levelKey": "level",
     "levelEncoder": "lowercase"

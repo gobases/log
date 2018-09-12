@@ -20,12 +20,13 @@ func (z *Logger) getLog() *zap.SugaredLogger {
 		var opts = []zap.Option{zap.AddCallerSkip(2)}
 		z.atomLevel = zap.NewAtomicLevel()
 		workDir, _ := filepath.Abs("./")
-		var file = filepath.Join(workDir, "conf", "log.json")
+		var file = filepath.Join(workDir, "conf", "zap.json")
 		_, err := os.Stat(file)
 		var log *zap.Logger
-		if err != nil || os.IsNotExist(err) {
+		if err != nil {
 			conf := zap.NewProductionConfig()
 			conf.Level = z.atomLevel
+			//conf.Sampling = nil //disable sampling
 			log, _ = conf.Build(opts...)
 		} else { // load config from file then create a logger
 			buf, err := ioutil.ReadFile(file)

@@ -5,6 +5,8 @@ import (
 	"time"
 	"github.com/gobasis/log/zapimpl"
 	"go.uber.org/zap"
+	"math/rand"
+	"strconv"
 )
 
 /*
@@ -14,7 +16,7 @@ show demos of gobasis/log
  * Date: 2018/09/10 18:30
 */
 func main() {
-	benchMark()
+	//benchMark()
 	levelDemo()
 }
 
@@ -25,24 +27,24 @@ func benchMark() {
 	log.UseLog(&log.StandardLogger{})
 	fromStd := time.Now().Unix()
 	for i := 0; i < count; i++ {
-		log.Info("using standard log, failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
+		log.Info("using standard log, failed to fetch URL" + strconv.Itoa(rand.Int()), "url", url, "attempt", i, "backoff", time.Duration(rand.Int63()))
 	}
 	toStd := time.Now().Unix()
 	log.UseLog(&zapimpl.Logger{})
 	fromZap := time.Now().Unix()
 	for i := 0; i < count; i++ {
-		log.Info("using zap log, failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
+		log.Info("using zap log, failed to fetch URL" + strconv.Itoa(rand.Int()), "url", url, "attempt", i, "backoff", time.Duration(rand.Int63()))
 	}
 	toZap := time.Now().Unix()
 	zlog, _ := zap.NewProduction()
 	sugar := zlog.Sugar()
 	fromRawZap := time.Now().Unix()
 	for i := 0; i < count; i++ {
-		sugar.Infow("using raw zap log, failed to fetch URL",
+		sugar.Infow("using raw zap log, failed to fetch URL" + strconv.Itoa(rand.Int()),
 			// Structured context as loosely typed key-value pairs.
 			"url", url,
-			"attempt", 3,
-			"backoff", time.Second,
+			"attempt", i,
+			"backoff", time.Duration(rand.Int63()),
 		)
 	}
 	toRawZap := time.Now().Unix()
@@ -53,7 +55,7 @@ func benchMark() {
 
 func levelDemo() {
 	log.UseLog(&zapimpl.Logger{}) // use zap log
-	log.SetLevel(log.InfoLevel)
+	//log.SetLevel(log.InfoLevel)
 	log.Debug("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	log.Info("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	log.Warn("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
@@ -61,3 +63,18 @@ func levelDemo() {
 	//log.Panic("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	//log.Fatal("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 }
+
+//func rotate() {
+//	w := zapcore.AddSync(&lumberjack.Logger{
+//		Filename:   "/var/log/myapp/foo.log",
+//		MaxSize:    500, // megabytes
+//		MaxBackups: 3,
+//		MaxAge:     28, // days
+//	})
+//	core := zapcore.NewCore(
+//		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+//		w,
+//		zap.InfoLevel,
+//	)
+//	logger := zap.New(core)
+//}
