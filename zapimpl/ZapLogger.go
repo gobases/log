@@ -37,8 +37,12 @@ func(z *Logger) Initialize(conf *log.Config) {
 	}
 	if conf != nil { //set config from log.json
 		z.SetLevel(int8(conf.Level))
-		cfg.OutputPaths = conf.OutputPaths
-		cfg.ErrorOutputPaths = conf.ErrorOutputPaths
+		if len(conf.OutputPaths) != 0 {
+			cfg.OutputPaths = conf.OutputPaths
+		}
+		if len(conf.ErrorOutputPaths) != 0 {
+			cfg.ErrorOutputPaths = conf.ErrorOutputPaths
+		}
 	}
 	//conf.Sampling = nil //disable sampling
 	log, _ = cfg.Build(opts...)
