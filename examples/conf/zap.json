@@ -1,8 +1,5 @@
 {
-  "level": "debug",
   "encoding": "json",
-  "outputPaths": ["stdout", "debug.log"],
-  "errorOutputPaths": ["stderr"],
   "initialFields": {"foo": "bar"},
   "encoderConfig": {
     "messageKey": "message",

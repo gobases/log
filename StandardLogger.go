@@ -10,9 +10,23 @@ type StandardLogger struct {
 	level Level
 }
 
+func(s *StandardLogger) Initialize(conf *Config) {
+	s.log = log.New(os.Stderr, "", log.LstdFlags)
+	if conf != nil {
+		s.level = conf.Level
+		//s.log.SetOutput(&rotate.Logger{
+		//	Filename:   "foo.log",
+		//	MaxSize:    1, // megabytes
+		//	MaxBackups: 3,
+		//	MaxAge:     28, // days
+		//	Compress:   true, // disabled by default
+		//})
+	}
+}
+
 func(s *StandardLogger) getLog() *log.Logger {
 	if s.log == nil {
-		s.log = log.New(os.Stderr, "", log.LstdFlags)
+		initialize(nil)
 	}
 	return s.log
 }

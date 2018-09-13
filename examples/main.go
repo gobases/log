@@ -16,7 +16,7 @@ show demos of gobasis/log
  * Date: 2018/09/10 18:30
 */
 func main() {
-	//benchMark()
+	benchMark()
 	levelDemo()
 }
 
@@ -55,7 +55,7 @@ func benchMark() {
 
 func levelDemo() {
 	log.UseLog(&zapimpl.Logger{}) // use zap log
-	//log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.InfoLevel)
 	log.Debug("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	log.Info("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	log.Warn("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
@@ -63,18 +63,3 @@ func levelDemo() {
 	//log.Panic("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 	//log.Fatal("failed to fetch URL", "url", url, "attempt", 3, "backoff", time.Second)
 }
-
-//func rotate() {
-//	w := zapcore.AddSync(&lumberjack.Logger{
-//		Filename:   "/var/log/myapp/foo.log",
-//		MaxSize:    500, // megabytes
-//		MaxBackups: 3,
-//		MaxAge:     28, // days
-//	})
-//	core := zapcore.NewCore(
-//		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-//		w,
-//		zap.InfoLevel,
-//	)
-//	logger := zap.New(core)
-//}

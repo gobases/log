@@ -1,6 +1,7 @@
 package log
 
 type Logger interface {
+	Initialize(conf *Config)
 	SetLevel(lvl int8)
 	Debug(msg string, data []interface{})
 	Info(msg string, data []interface{})

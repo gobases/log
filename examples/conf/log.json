@@ -1,8 +1,5 @@
 {
   "level": "debug",
-  "rotate": {
-    "messageKey": "message",
-    "levelKey": "level",
-    "levelEncoder": "lowercase"
-  }
+  "outputPaths": ["stdout", "debug.log"],
+  "errorOutputPaths": ["stderr"]
 }

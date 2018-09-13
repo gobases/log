@@ -1,13 +1,13 @@
 package zapimpl
 
 import (
-	"encoding/json"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"github.com/gobasis/log"
+	"path/filepath"
+	"os"
+	"io/ioutil"
+	"encoding/json"
 )
 
 type Logger struct {
@@ -15,44 +15,48 @@ type Logger struct {
 	atomLevel zap.AtomicLevel
 }
 
+func(z *Logger) Initialize(conf *log.Config) {
+	var opts = []zap.Option{zap.AddCallerSkip(2)}
+	z.atomLevel = zap.NewAtomicLevel()
+	workDir, _ := filepath.Abs("./")
+	var file = filepath.Join(workDir, "conf", "zap.json")
+	_, err := os.Stat(file)
+	var log *zap.Logger
+	var cfg = zap.NewProductionConfig()
+	if err != nil {
+		cfg.Level = z.atomLevel
+	} else { // load config from file then create a logger
+		buf, err := ioutil.ReadFile(file)
+		if err != nil {
+			panic(err)
+		}
+		if err := json.Unmarshal(buf, &cfg); err != nil {
+			panic(err)
+		}
+		cfg.Level = z.atomLevel
+	}
+	if conf != nil { //set config from log.json
+		z.SetLevel(int8(conf.Level))
+		cfg.OutputPaths = conf.OutputPaths
+		cfg.ErrorOutputPaths = conf.ErrorOutputPaths
+	}
+	//conf.Sampling = nil //disable sampling
+	log, _ = cfg.Build(opts...)
+	z.log = log.Sugar()
+}
+
 func (z *Logger) getLog() *zap.SugaredLogger {
 	if z.log == nil {
-		var opts = []zap.Option{zap.AddCallerSkip(2)}
-		z.atomLevel = zap.NewAtomicLevel()
-		workDir, _ := filepath.Abs("./")
-		var file = filepath.Join(workDir, "conf", "zap.json")
-		_, err := os.Stat(file)
-		var log *zap.Logger
-		if err != nil {
-			conf := zap.NewProductionConfig()
-			conf.Level = z.atomLevel
-			//conf.Sampling = nil //disable sampling
-			log, _ = conf.Build(opts...)
-		} else { // load config from file then create a logger
-			buf, err := ioutil.ReadFile(file)
-			if err != nil {
-				panic(err)
-			}
-			var conf = zap.NewProductionConfig()
-			if err := json.Unmarshal(buf, &conf); err != nil {
-				panic(err)
-			}
-			conf.Level = z.atomLevel
-			log, _ = conf.Build(opts...)
-		}
-		z.log = log.Sugar()
+		z.Initialize(nil)
 	}
 	return z.log
 }
 
 func (z *Logger) SetLevel(lvl int8) {
-	if z.log == nil {
-		z.getLog()
-	}
 	if lvl > int8(log.ErrorLevel) {
-		z.atomLevel.SetLevel(zapcore.Level(lvl + 1))
-	} else {
 		z.atomLevel.SetLevel(zapcore.Level(lvl))
+	} else {
+		z.atomLevel.SetLevel(zapcore.Level(lvl - 1))
 	}
 }
 

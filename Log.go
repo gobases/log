@@ -9,8 +9,10 @@ import (
 
 type Config struct {
 	Use    	       string `json:"use" yaml:"use"`
-	level          Level
+	Level          Level
 	LevelName      string `json:"level" yaml:"level"`
+	OutputPaths    []string `json:"outputPaths" yaml:"outputPaths"`
+	ErrorOutputPaths []string `json:"errorOutputPaths" yaml:"errorOutputPaths"`
 	//Rotate RotateConf `json:"rotate" yaml:"rotate"`
 }
 var conf Config
@@ -37,11 +39,19 @@ func Fatal(msg string, data ...interface{}) {
 
 func UseLog(lg Logger) {
 	logger = lg
-	SetLevel(conf.level)
+	initialize(&conf)
+}
+
+func initialize(conf *Config) {
+	if logger != nil {
+		if conf != nil {
+			conf.Level = LevelParse(conf.LevelName)
+		}
+		logger.Initialize(conf)
+	}
 }
 
 func SetLevel(lvl Level) {
-	conf.level = lvl
 	logger.SetLevel(int8(lvl))
 }
 
@@ -57,9 +67,6 @@ func init() {
 		if err := json.Unmarshal(buf, &conf); err != nil {
 			panic(err)
 		}
-		if len(conf.LevelName) != 0 {
-			SetLevel(LevelParse(conf.LevelName))
-		}
-
+		initialize(&conf)
 	}
 }
