@@ -1,3 +1,4 @@
 /.idea
 /examples/debug.log
 /*.log
+/examples/*.log
