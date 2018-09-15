@@ -32,7 +32,11 @@ func(s *StandardLogger) getLog() *log.Logger {
 }
 
 func(s *StandardLogger) SetLevel(lvl int8) {
-	s.level = Level(lvl)
+	if s.level == DevDebugLevel {
+		s.level = Level(DebugLevel)
+	} else {
+		s.level = Level(lvl)
+	}
 }
 
 func(s *StandardLogger) Debug(msg string, data []interface{}) {

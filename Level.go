@@ -13,6 +13,8 @@ const (
 	// ErrorLevel logs are high-priority. If an application is running smoothly,
 	// it shouldn't generate any error-level logs.
 	ErrorLevel
+	// DevDebugLevel logs are same as DebugLevel, but panic/fatal will print error like nomal
+	DevDebugLevel
 	// PanicLevel logs a message, then panics.
 	PanicLevel
 	// FatalLevel logs a message, then calls os.Exit(1).
@@ -27,10 +29,12 @@ func LevelParse(lvl string) Level {
 		return InfoLevel
 	case "warn":
 		return WarnLevel
-	case "error":
-		return ErrorLevel
+	case "dev":
+		return DevDebugLevel
 	case "panic":
 		return PanicLevel
+	case "error":
+		return ErrorLevel
 	case "fatal":
 		return FatalLevel
 	}

@@ -8,11 +8,13 @@ import (
 	"os"
 	"io/ioutil"
 	"encoding/json"
+	glog "log"
 )
 
 type Logger struct {
 	log       *zap.SugaredLogger
 	atomLevel zap.AtomicLevel
+	level log.Level
 }
 
 func(z *Logger) Initialize(conf *log.Config) {
@@ -57,10 +59,11 @@ func (z *Logger) getLog() *zap.SugaredLogger {
 }
 
 func (z *Logger) SetLevel(lvl int8) {
-	if lvl > int8(log.ErrorLevel) {
-		z.atomLevel.SetLevel(zapcore.Level(lvl))
+	z.level = log.Level(lvl)
+	if z.level == log.DevDebugLevel {
+		z.atomLevel.SetLevel(zapcore.Level(int8(log.DebugLevel) - 1))
 	} else {
-		z.atomLevel.SetLevel(zapcore.Level(lvl - 1))
+		z.atomLevel.SetLevel(zapcore.Level(lvl -1))
 	}
 }
 
@@ -81,9 +84,27 @@ func (z *Logger) Error(msg string, data []interface{}) {
 }
 
 func (z *Logger) Panic(msg string, data []interface{}) {
-	z.getLog().Panicw(msg, data...)
+	if z.level == log.DevDebugLevel {
+		for _, ele := range data {
+			switch ele.(type) {
+			case error:
+				glog.Panic(ele)
+			}
+		}
+	} else {
+		z.getLog().Panicw(msg, data...)
+	}
 }
 
 func (z *Logger) Fatal(msg string, data []interface{}) {
-	z.getLog().Fatalw(msg, data...)
+	if z.level == log.DevDebugLevel {
+		for _, ele := range data {
+			switch ele.(type) {
+			case error:
+				glog.Panic(ele)
+			}
+		}
+	} else {
+		z.getLog().Fatalw(msg, data...)
+	}
 }
