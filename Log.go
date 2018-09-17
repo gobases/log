@@ -30,9 +30,21 @@ func Warn(msg string, data ...interface{}) {
 func Error(msg string, data ...interface{}) {
 	logger.Error(msg, data)
 }
+/*
+Description:
+log message with panic level, then panic(), you should avoid use this.
+ * Author: architect.bian
+ * Date: 2018/09/17 13:40
+ */
 func Panic(msg string, data ...interface{}) {
 	logger.Panic(msg, data)
 }
+/*
+Description:
+log message with fatal level, then fatal(), you should avoid use this.
+ * Author: architect.bian
+ * Date: 2018/09/17 13:40
+ */
 func Fatal(msg string, data ...interface{}) {
 	logger.Fatal(msg, data)
 }
